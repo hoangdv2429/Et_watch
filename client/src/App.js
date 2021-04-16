@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import getWeb3 from "./getWeb3";
 import { default as contract } from 'truffle-contract';
 
@@ -7,6 +8,7 @@ import diary_artifacts from './contracts/Diary.json'
 
 import "./App.css";
 import Home from "./page/Home";
+import Login from "./page/Login";
 
 // TODO: start
 class App extends Component {
@@ -128,7 +130,20 @@ class App extends Component {
             return <div>Loading Web3, accounts, and contract...</div>;
         }
         return (
-            <Home handleSubmit={this.addDiaryEntry}></Home>
+            <div>
+                <BrowserRouter>
+                    <React.Suspense>
+                        <Switch>
+                            <Route exact path="/" render={(props) => {
+                                return <Login />
+                            }} />
+                            <Route exact path="/home" render={(props) => {
+                                return <Home handleSubmit={this.addDiaryEntry} />
+                            }} />
+                        </Switch>
+                    </React.Suspense>
+                </BrowserRouter>
+            </div>
         );
     }
 }
