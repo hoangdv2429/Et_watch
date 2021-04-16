@@ -64,13 +64,13 @@ class App extends Component {
         var content = document.getElementById("new-content").value;
         console.log(content);
 
-        this.setStatus("Adding entry... (please wait)");
+        self.setStatus("Adding entry... (please wait)");
 
         var meta;
-        this.state.contract.deployed().then(function (instance) {
+        self.state.contract.deployed().then(function (instance) {
             meta = instance;
             console.log("at line 62")
-            return meta.addEntry(content, { from: this.state.account });
+            return meta.addEntry(content, { from: self.state.account });
         }).then(function () {
             self.setStatus("Diary entry added!");
             self.refreshEntries();
