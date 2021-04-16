@@ -15,7 +15,8 @@ launch ganache
 
 truffle migrate (in windows use truffle.cmd migrate)
 
-npm run dev
+cd client
+npm run start
 ```
 
 Go to http://localhost:8080/ to test the app.
