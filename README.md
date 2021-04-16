@@ -1,10 +1,6 @@
-# Sarah 
+# Eternal
 
 A blockchain powered interactive journal
-
-## Demo
-
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/lr9mZSmilvo/0.jpg)](https://www.youtube.com/watch?v=lr9mZSmilvo)
 
 ## Run Project
 

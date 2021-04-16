@@ -1,7 +1,7 @@
 pragma solidity ^0.5.16;
 
 contract Diary {
-  address private owner;
+  address payable private owner;
   string private testPhrase;
 
   struct Entry {
@@ -12,37 +12,37 @@ contract Diary {
   uint private numEntries;
 
   // Constructor
-  function Diary(/*string encryptedTestPhrase*/) public {
+  function TheDiary(/*string encryptedTestPhrase*/) public {
     owner = msg.sender;
     numEntries = 0;
     testPhrase = "password";
   }
 
-  function addEntry(string content) public returns (bool success) {
+  function addEntry(string memory content) public returns (bool success) {
     if (msg.sender != owner) 
-      return;
+      return false;
     entries[numEntries].content = content;
     numEntries++;
     return true;
   }
 
-  function setEntry(uint index, string content) public returns (bool success) {
-    if (msg.sender != owner) return;
+  function setEntry(uint index, string memory content) public returns (bool success) {
+    if (msg.sender != owner) return false;
 
     Entry storage entry = entries[index];
 
-    if (keccak256(content) != keccak256(entry.content)) {
+    if (keccak256(abi.encode(content)) != keccak256(abi.encode(entry.content))) {
       entry.content = content;
     }
 
     return true;
   }
 
-  function getEntry(uint index) public view returns (string content) {
+  function getEntry(uint index) public view returns (string memory content) {
     content = entries[index].content;
   }
 
-  function getEntries() public view returns (string allEntries) {
+  function getEntries() public view returns (string memory allEntries) {
     if (numEntries == 0) return '';
 
     uint totalLength = 0;
@@ -52,6 +52,7 @@ contract Diary {
 
     bytes memory result = bytes(new string(totalLength));
     uint counter = 0;
+    uint i;
     for (i=0; i < numEntries; i++) {
       bytes memory content = bytes(entries[i].content);
       for (uint x=0; x < content.length; x++) {
@@ -68,7 +69,7 @@ contract Diary {
     return string(result);
   }
 
-  function getTestPhrase() public view returns (string phrase) {
+  function getTestPhrase() public view returns (string memory phrase) {
     return testPhrase;
   }
 
@@ -77,6 +78,6 @@ contract Diary {
   }
 
   function kill() public {
-    if (msg.sender == owner) selfdestruct(owner);
+    if (msg.sender == owner) selfdestruct(msg.sender);
   }
 }
