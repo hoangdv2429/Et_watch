@@ -73,6 +73,7 @@ class App extends Component {
         };
     };
 
+    // FIXME: 
     addDiaryEntry = async (e) => {
         try {
             e.preventDefault();
@@ -85,25 +86,32 @@ class App extends Component {
             self.createNotification("info", "Adding entry... (please wait)");
 
             var meta = await self.state.contract.deployed();
-            await meta.addEntry(content, { from: self.state.account });
-
+            const result = await meta.addEntry(content, { from: self.state.account });
+            console.log(result);
             self.createNotification("success", "Diary entry added!");
             self.refreshEntries();
-            window.location.reload();
+            // window.location.reload();
         } catch (e) {
             console.log(e);
             self.createNotification("error", "Error sending coin; see log.");
         };
     }
 
+    // FIXME: value rỗng
     refreshEntries = async () => {
         try {
             var self = this;
             console.log("Chay refreshEntries");
             console.log(self.state);
             var meta = await self.state.contract.deployed();
-            var value = await meta.getEntries.call({ from: self.state.account });
-
+            console.log(self.state.account);
+            console.log(meta);
+            // check number of Entries
+            var numberOfEntries = await meta.getNumEntries({ from: self.state.account });
+            console.log("So luong: ");
+            console.log(numberOfEntries);
+            var value = await meta.getEntries({ from: self.state.account });
+            console.log(value);
             console.log("Retrieved values are : " + value);
             var str_array = value.split(',');
             var ul = document.getElementById('all-entries');
