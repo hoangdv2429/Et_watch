@@ -6,7 +6,7 @@ export default class Home extends Component {
         return (
             <div>
                 <div>
-                    <div class="overlay"></div>
+                    <div className="overlay"></div>
                     <div className="fullscreen-bg">
                         <video loop muted autoPlay poster="img/videoframe.jpg" className="fullscreen-bg__video">
                             <source src={video} type="video/mp4" />

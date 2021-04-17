@@ -73,41 +73,37 @@ class App extends Component {
         };
     };
 
-    addDiaryEntry = (e) => {
-        e.preventDefault();
-        console.log("Chay addDiary Entry");
-        var self = this;
+    addDiaryEntry = async (e) => {
+        try {
+            e.preventDefault();
+            console.log("Chay addDiary Entry");
+            var self = this;
 
-        var content = document.getElementById("new-content").value;
-        console.log(content);
+            var content = document.getElementById("new-content").value;
+            console.log(content);
 
-        self.createNotification("info", "Adding entry... (please wait)");
+            self.createNotification("info", "Adding entry... (please wait)");
 
-        var meta;
-        self.state.contract.deployed().then(function (instance) {
-            meta = instance;
-            console.log("at line 62")
-            return meta.addEntry(content, { from: self.state.account });
-        }).then(function () {
+            var meta = await self.state.contract.deployed();
+            await meta.addEntry(content, { from: self.state.account });
+
             self.createNotification("success", "Diary entry added!");
             self.refreshEntries();
             window.location.reload();
-        }).catch(function (e) {
+        } catch (e) {
             console.log(e);
             self.createNotification("error", "Error sending coin; see log.");
-        });
+        };
     }
 
-    refreshEntries = () => {
-        var self = this;
-        console.log("Chay refreshEntries");
-        console.log(self.state)
-        var meta;
-        self.state.contract.deployed().then(function (instance) {
-            meta = instance;
-            return meta.getEntries.call({ from: self.state.account });
-        }).then(function (value) {
-            // var entries_element = document.getElementById("all-entries");
+    refreshEntries = async () => {
+        try {
+            var self = this;
+            console.log("Chay refreshEntries");
+            console.log(self.state);
+            var meta = await self.state.contract.deployed();
+            var value = await meta.getEntries.call({ from: self.state.account });
+
             console.log("Retrieved values are : " + value);
             var str_array = value.split(',');
             var ul = document.getElementById('all-entries');
@@ -124,11 +120,12 @@ class App extends Component {
                 ul.appendChild(li);
                 ul.appendChild(document.createElement('br'));
             }
-        }).catch(function (e) {
+        } catch (e) {
             console.log(e);
             self.createNotification("error", "Error getting diary entries; see log.");
-        });
+        };
     }
+
 
     voiceRecognition = () => {
         var self = this;
