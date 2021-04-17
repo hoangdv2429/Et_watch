@@ -262,7 +262,7 @@ class App extends Component {
         return (
             <div>
                 <NotificationContainer />
-                <Home handleSubmit={this.addDiaryEntry} />
+                <Home handleSubmit={this.addDiaryEntry} account={this.state.account} />
             </div>
         );
     }
