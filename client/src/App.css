@@ -51,7 +51,20 @@ button {
   left: 0;
   overflow: hidden;
   z-index: -100;
+  opacity: 0.8;
 }
+
+.overlay {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: -99;
+  background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);;
+  opacity: 0.3;
+}
+
 body{
 color:#fff;
 font-family: 'Raleway', serif;
@@ -118,7 +131,6 @@ background-color: rgba(0,31,63,0.3);
 
 .previous-title {
   font-size: 2rem;
-  color: #AAA;
   margin-left: 15%;
   margin-bottom: 1rem;
 }

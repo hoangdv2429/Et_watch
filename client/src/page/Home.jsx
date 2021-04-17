@@ -1,13 +1,17 @@
 import React, { Component } from 'react'
+import video from '../video_promotion_2.mp4'
 
 export default class Home extends Component {
     render() {
         return (
             <div>
-                <div className="fullscreen-bg">
-                    <video loop muted autoPlay poster="img/videoframe.jpg" className="fullscreen-bg__video">
-                        <source src="https://d27shkkua6xyjc.cloudfront.net/videos/maaemo-film-2.mp4?mtime=20141113185431" type="video/mp4" />
-                    </video>
+                <div>
+                    <div class="overlay"></div>
+                    <div className="fullscreen-bg">
+                        <video loop muted autoPlay poster="img/videoframe.jpg" className="fullscreen-bg__video">
+                            <source src={video} type="video/mp4" />
+                        </video>
+                    </div>
                 </div>
                 <div className="container">
                     <div className=" row">
@@ -21,7 +25,7 @@ export default class Home extends Component {
                         <h2 className="text-field-title">New Diary Entry</h2>
                     </div>
                     <div className="row">
-                        <input className="form-control account-text-field" type="text" value={"Account: " + this.props.account}/>
+                        <input className="form-control account-text-field" type="text" value={"Account: " + this.props.account} />
                     </div>
                     <div className="row">
                         <textarea className="diary-text-field form-control" id="new-content" placeholder="How was your day?"></textarea>
