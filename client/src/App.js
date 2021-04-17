@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import { NotificationContainer, NotificationManager } from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
+
 import getWeb3 from "./getWeb3";
 import { default as contract } from 'truffle-contract';
 
@@ -53,11 +56,22 @@ class App extends Component {
         }
     };
 
-
-    setStatus = (message) => {
-        var status = document.getElementById("status");
-        status.innerHTML = message;
-    }
+    createNotification = (type, message) => {
+        switch (type) {
+            case "info":
+                NotificationManager.info(message, '', 2000);
+                break;
+            case "success":
+                NotificationManager.success(message, '');
+                break;
+            case "warning":
+                NotificationManager.warning(message, '', 2000);
+                break;
+            case "error":
+                NotificationManager.error(message, '');
+                break;
+        };
+    };
 
     addDiaryEntry = (e) => {
         e.preventDefault();
@@ -67,7 +81,7 @@ class App extends Component {
         var content = document.getElementById("new-content").value;
         console.log(content);
 
-        self.setStatus("Adding entry... (please wait)");
+        self.createNotification("info", "Adding entry... (please wait)");
 
         var meta;
         self.state.contract.deployed().then(function (instance) {
@@ -75,12 +89,12 @@ class App extends Component {
             console.log("at line 62")
             return meta.addEntry(content, { from: self.state.account });
         }).then(function () {
-            self.setStatus("Diary entry added!");
+            self.createNotification("success", "Diary entry added!");
             self.refreshEntries();
             window.location.reload();
         }).catch(function (e) {
             console.log(e);
-            self.setStatus("Error sending coin; see log.");
+            self.createNotification("error", "Error sending coin; see log.");
         });
     }
 
@@ -112,11 +126,13 @@ class App extends Component {
             }
         }).catch(function (e) {
             console.log(e);
-            self.setStatus("Error getting diary entries; see log.");
+            self.createNotification("error", "Error getting diary entries; see log.");
         });
     }
 
     voiceRecognition = () => {
+        var self = this;
+
         try {
             console.log("in speech");
             var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -130,9 +146,10 @@ class App extends Component {
         // var noteTextarea = $('#new-content');
         // var instructions = $('#recording-instructions');
         var noteTextarea = document.getElementById('new-content');
-        var instructions = document.getElementById('recording-instructions');
+        // var instructions = document.getElementById('recording-instructions');
 
         var noteContent = '';
+        var recognizing = false;
 
         /*-----------------------------
               Voice Recognition 
@@ -166,32 +183,52 @@ class App extends Component {
         };
 
         recognition.onstart = function () {
-            instructions.textContent = 'Voice recognition activated. Try speaking into the microphone.';
+            recognizing = true;
+            self.createNotification('info', 'Voice recognition activated. Try speaking into the microphone.');
+            // instructions.textContent = 'Voice recognition activated. Try speaking into the microphone.';
         }
 
         recognition.onspeechend = function () {
-            instructions.textContent = 'You were quiet for a while so voice recognition turned itself off.';
+            recognizing = false;
+            self.createNotification('info', 'You were quiet for a while so voice recognition turned itself off.');
+            // instructions.textContent = 'You were quiet for a while so voice recognition turned itself off.';
         }
 
         recognition.onerror = function (event) {
+            recognizing = false;
             if (event.error === 'no-speech') {
-                instructions.textContent = 'No speech was detected. Try again.';
+                self.createNotification('info', 'No speech was detected. Try again.');
+                // instructions.textContent = 'No speech was detected. Try again.';
             };
         }
 
         /*-----------------------------
               App buttons and input 
         ------------------------------*/
-        document.getElementById('start-record-btn').onclick = (e) => {
+        const startButton = document.getElementById('start-record-btn');
+        const pauseButton = document.getElementById('pause-record-btn');
+
+        startButton.onclick = (e) => {
             if (noteContent.length) {
                 noteContent += ' ';
             }
-            recognition.start();
+            startButton.classList.value = 'btn btn-lg btn-info';
+            pauseButton.classList.value = 'btn btn-lg btn-secondary';
+
+            if (!recognizing) {
+                recognition.start();
+            } else {
+                self.createNotification('warning', 'Recognition has already started.');
+            }
         };
 
-        document.getElementById('pause-record-btn').onclick = (e) => {
+        pauseButton.onclick = (e) => {
             recognition.stop();
-            instructions.textContent = 'Voice recognition paused.';
+            self.createNotification('info', 'Voice recognition paused.');
+            // instructions.textContent = 'Voice recognition paused.';
+
+            startButton.classList.value = 'btn btn-lg btn-secondary';
+            pauseButton.classList.value = 'btn btn-lg btn-info';
         };
 
         // Sync the text inside the text area with the noteContent variable.
@@ -224,6 +261,7 @@ class App extends Component {
         }
         return (
             <div>
+                <NotificationContainer />
                 <Home handleSubmit={this.addDiaryEntry} />
             </div>
         );
