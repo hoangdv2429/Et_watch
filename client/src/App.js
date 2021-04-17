@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import getWeb3 from "./getWeb3";
 import { default as contract } from 'truffle-contract';
 
@@ -8,9 +7,7 @@ import diary_artifacts from './contracts/Diary.json'
 
 import "./App.css";
 import Home from "./page/Home";
-import Login from "./page/Login";
 
-// TODO: start
 class App extends Component {
     state = { storageValue: 0, web3: null, accounts: null, account: null, contract: null };
 
@@ -22,6 +19,7 @@ class App extends Component {
             const web3 = await getWeb3();
             const Diary = contract(diary_artifacts);
 
+            console.log(Diary);
             // Bootstrap the MetaCoin abstraction for Use.
             Diary.setProvider(web3.currentProvider);
 
@@ -41,7 +39,10 @@ class App extends Component {
                 console.log(accs[0]);
                 // Set web3, accounts, and contract to the state, and then proceed with an
                 // example of interacting with the contract's methods.
-                self.setState({ web3, accounts: accs, account: accs[0], contract: Diary }, this.refreshEntries);
+
+                self.setState({ web3, accounts: accs, account: accs[0], contract: Diary });
+                self.refreshEntries();
+                self.voiceRecognition();
             });
         } catch (error) {
             // Catch any errors for any of the above operations.
@@ -58,7 +59,9 @@ class App extends Component {
         status.innerHTML = message;
     }
 
-    addDiaryEntry = () => {
+    addDiaryEntry = (e) => {
+        e.preventDefault();
+        console.log("Chay addDiary Entry");
         var self = this;
 
         var content = document.getElementById("new-content").value;
@@ -83,9 +86,10 @@ class App extends Component {
 
     refreshEntries = () => {
         var self = this;
-
+        console.log("Chay refreshEntries");
+        console.log(self.state)
         var meta;
-        this.state.contract.deployed().then(function (instance) {
+        self.state.contract.deployed().then(function (instance) {
             meta = instance;
             return meta.getEntries.call({ from: self.state.account });
         }).then(function (value) {
@@ -112,18 +116,107 @@ class App extends Component {
         });
     }
 
-    runExample = async () => {
-        const { accounts, contract } = this.state;
+    voiceRecognition = () => {
+        try {
+            console.log("in speech");
+            var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            var recognition = new SpeechRecognition();
+        }
+        catch (e) {
+            console.error(e);
+            alert("Please upgrade your browser");
+        }
 
-        // Stores a given value, 5 by default.
-        await contract.methods.set(5).send({ from: accounts[0] });
+        // var noteTextarea = $('#new-content');
+        // var instructions = $('#recording-instructions');
+        var noteTextarea = document.getElementById('new-content');
+        var instructions = document.getElementById('recording-instructions');
 
-        // Get the value from the contract to prove it worked.
-        const response = await contract.methods.get().call();
+        var noteContent = '';
 
-        // Update state with the result.
-        this.setState({ storageValue: response });
-    };
+        /*-----------------------------
+              Voice Recognition 
+        ------------------------------*/
+
+        // If false, the recording will stop after a few seconds of silence.
+        // When true, the silence period is longer (about 15 seconds),
+        // allowing us to keep recording even when the user pauses. 
+        recognition.continuous = true;
+
+        // This block is called every time the Speech APi captures a line. 
+        recognition.onresult = function (event) {
+
+            // event is a SpeechRecognitionEvent object.
+            // It holds all the lines we have captured so far. 
+            // We only need the current one.
+            var current = event.resultIndex;
+
+            // Get a transcript of what was said.
+            var transcript = event.results[current][0].transcript;
+
+            // Add the current transcript to the contents of our Note.
+            // There is a weird bug on mobile, where everything is repeated twice.
+            // There is no official solution so far so we have to handle an edge case.
+            var mobileRepeatBug = (current === 1 && transcript === event.results[0][0].transcript);
+
+            if (!mobileRepeatBug) {
+                noteContent += transcript;
+                noteTextarea.value = noteContent;
+            }
+        };
+
+        recognition.onstart = function () {
+            instructions.textContent = 'Voice recognition activated. Try speaking into the microphone.';
+        }
+
+        recognition.onspeechend = function () {
+            instructions.textContent = 'You were quiet for a while so voice recognition turned itself off.';
+        }
+
+        recognition.onerror = function (event) {
+            if (event.error === 'no-speech') {
+                instructions.textContent = 'No speech was detected. Try again.';
+            };
+        }
+
+        /*-----------------------------
+              App buttons and input 
+        ------------------------------*/
+        document.getElementById('start-record-btn').onclick = (e) => {
+            if (noteContent.length) {
+                noteContent += ' ';
+            }
+            recognition.start();
+        };
+
+        document.getElementById('pause-record-btn').onclick = (e) => {
+            recognition.stop();
+            instructions.textContent = 'Voice recognition paused.';
+        };
+
+        // Sync the text inside the text area with the noteContent variable.
+        noteTextarea.oninput = (e) => {
+            console.log(e.target.value)
+            noteContent = e.target.value;
+        };
+
+
+        /*-----------------------------
+              Speech Synthesis 
+        ------------------------------*/
+
+        // function readOutLoud(message) {
+        //     var speech = new SpeechSynthesisUtterance();
+
+        //     // Set the text and voice attributes.
+        //     speech.text = message;
+        //     speech.volume = 1;
+        //     speech.rate = 1;
+        //     speech.pitch = 1;
+
+        //     window.speechSynthesis.speak(speech);
+        // }
+    }
 
     render() {
         if (!this.state.web3) {
@@ -131,18 +224,7 @@ class App extends Component {
         }
         return (
             <div>
-                <BrowserRouter>
-                    <React.Suspense>
-                        <Switch>
-                            <Route exact path="/" render={(props) => {
-                                return <Login />
-                            }} />
-                            <Route exact path="/home" render={(props) => {
-                                return <Home handleSubmit={this.addDiaryEntry} />
-                            }} />
-                        </Switch>
-                    </React.Suspense>
-                </BrowserRouter>
+                <Home handleSubmit={this.addDiaryEntry} />
             </div>
         );
     }
