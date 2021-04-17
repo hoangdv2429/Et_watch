@@ -11,7 +11,7 @@ contract Diary {
   mapping (uint => Entry) private entries;
   uint private numEntries;
 
-  function getNumEntries() public returns (uint){
+  function getNumEntries() public view returns (uint){
     return numEntries;
   }
 
