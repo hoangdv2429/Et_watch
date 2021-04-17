@@ -11,6 +11,10 @@ contract Diary {
   mapping (uint => Entry) private entries;
   uint private numEntries;
 
+  function getNumEntries() public returns (uint){
+    return numEntries;
+  }
+
   // Constructor
   function TheDiary(/*string encryptedTestPhrase*/) public {
     owner = msg.sender;

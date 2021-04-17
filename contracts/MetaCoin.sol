@@ -12,7 +12,7 @@ contract MetaCoin {
 
 	event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
-	function TheMetaCoin() public {
+	function theMetaCoin() public {
 		balances[tx.origin] = 10000;
 	}
 
