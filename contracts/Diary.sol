@@ -16,7 +16,7 @@ contract Diary {
   }
 
   // Constructor
-  function theDiary(/*string encryptedTestPhrase*/) public {
+  function theDiary() public {
     owner = msg.sender;
     numEntries = 0;
     testPhrase = "password";
